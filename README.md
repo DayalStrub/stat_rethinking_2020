@@ -59,7 +59,7 @@ The are several other conversions. See the full list at <https://xcelab.net/rm/s
 # Environment(s)
 
 ```bash
-sudo docker build --file Dockerfile --tag <sr .
+sudo docker build --file Dockerfile --tag sr .
 sudo docker run -p 8888:8888 -v "$PWD":/home/jovyan/notebooks sr jupyter lab --ContentsManager.allow_hidden=True --allow-root
 ```
 

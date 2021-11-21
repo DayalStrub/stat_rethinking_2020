@@ -1,0 +1,35 @@
+name: py38
+channels:
+  - pytorch
+  - conda-forge
+  - nodefaults
+dependencies:
+  ## core
+  # - python=3.8
+  - black
+  - ipykernel
+  - jupytext
+  - nbconvert
+  - pip>=20.2
+  ## packages
+  - altair
+  - arviz>=0.11
+  - cpuonly
+  - ipython-autotime
+  - ipywidgets
+  - matplotlib
+  - networkx
+  - numpy
+  - numpyro>=0.7
+  - pandas
+  - pyarrow
+  - pygraphviz
+  - pymc3>=3.11
+  - pyro-ppl>=1.7
+  - pytorch
+  - scikit-learn
+  - scipy
+  - seaborn
+  - tqdm
+  ## pip packages
+  # - pip:
