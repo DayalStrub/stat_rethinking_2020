@@ -1,25 +1,9 @@
-name: r40
-channels:
-  - conda-forge
-  - nodefaults
-dependencies:
-  # core
-  # - r-base=4.0
-  - r-irkernel
-  # packages
-  - r-arrow
-  - r-brms
-  - r-devtools
-  - r-diagrammer
-  - r-foreach
-  - r-here
-  - r-jsonlite
-  - r-lintr
-  - r-rcolorbrewer
-  - r-rcurl
-  - r-reticulate
-  - r-rstan=2.21
-  - r-styler
-  - r-tidymodels>=0.1
-  - r-tidyverse
-  - r-viridis
+r-brms
+r-devtools
+# r-here
+r-lintr
+# r-reticulate
+r-rstan=2.21
+r-styler
+# r-tidymodels>=0.1
+r-tidyverse

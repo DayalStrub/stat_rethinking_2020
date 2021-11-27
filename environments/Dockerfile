@@ -6,35 +6,39 @@ FROM jupyter/minimal-notebook
 
 RUN mamba install --quiet --yes jupytext && \
     # jupyter labextension install jupyterlab-jupytext && \
-    printf '\nc.NotebookApp.contents_manager_class = "jupytext.TextFileContentsManager"\nc.ContentsManager.default_jupytext_formats = "ipynb,py:percent,jl,auto"' >> /etc/jupyter/jupyter_notebook_config.py
+    printf '\nc.NotebookApp.contents_manager_class = "jupytext.TextFileContentsManager"\nc.ContentsManager.default_jupytext_formats = "ipynb,py:percent,jl"' >> /etc/jupyter/jupyter_notebook_config.py
 
 ## update python and R ----
 
-# RUN mamba update --name base --yes --file python.yaml
+## NOTE seems like conda update only takes a list of requirements,
+## and not an actual conda yaml
 
-# RUN mamba update --name base --yes --file r.yaml
+COPY python.yaml .
+# RUN mamba update --name base --channel pytorch conda-forge --yes --file python.yaml
+
+COPY r.yaml .
+# RUN mamba update --name base --channel conda-forge --yes --file r.yaml
 # RUN conda activate base && \
-#     Rscript -e "remotes::install_github('rmcelreath/rethinking')"
+    # Rscript -e "remotes::install_github('rmcelreath/rethinking')"
 
 ## add julia -----
 
-### ====================================
 ### copied form https://github.com/jupyter/docker-stacks/blob/master/datascience-notebook/Dockerfile
 
 USER root
 
-# Check https://julialang.org/downloads/
+## Check https://julialang.org/downloads/
 ARG julia_version="1.6.4"
 
-# Julia dependencies
-# install Julia packages in /opt/julia instead of ${HOME}
+## Julia dependencies
+## install Julia packages in /opt/julia instead of ${HOME}
 ENV JULIA_DEPOT_PATH=/opt/julia \
     JULIA_PKGDIR=/opt/julia \
     JULIA_VERSION="${julia_version}"
 
 WORKDIR /tmp
 
-# hadolint ignore=SC2046
+## hadolint ignore=SC2046
 RUN set -x && \
     julia_arch=$(uname -m) && \
     julia_short_arch="${julia_arch}" && \
@@ -49,21 +53,23 @@ RUN set -x && \
     rm "${julia_installer}" && \
     ln -fs /opt/julia-*/bin/julia /usr/local/bin/julia
 
-# Show Julia where conda libraries are \
+## Show Julia where conda libraries are \
 RUN mkdir /etc/julia && \
     echo "push!(Libdl.DL_LOAD_PATH, \"${CONDA_DIR}/lib\")" >> /etc/julia/juliarc.jl && \
-    # Create JULIA_PKGDIR \
+    ## Create JULIA_PKGDIR \
     mkdir "${JULIA_PKGDIR}" && \
     chown "${NB_USER}" "${JULIA_PKGDIR}" && \
     fix-permissions "${JULIA_PKGDIR}"
 
 USER ${NB_UID}
 
-### =========================================
+### Add Julia packages -------
 
-## Add Julia packages
+## TODO not working/actually adding project packages
 
-RUN mkdir -p ~/.julia/environments/${JULIA_VERSION} && cp Project.toml $_
+RUN mkdir -p ~/.julia/environments/${JULIA_VERSION} 
+# && \ cp Project.toml $_
+COPY Project.toml ~/.julia/environments/${JULIA_VERSION}
 
 RUN julia -e 'import Pkg; Pkg.activate()' && \
     julia -e 'import Pkg; Pkg.update()'
@@ -71,9 +77,10 @@ RUN julia -e 'import Pkg; Pkg.activate()' && \
     # julia -e 'ENV["R_HOME"] = "/home/ubuntu/miniconda/envs/R/lib/R";' && \
     # julia -e 'ENV["PYTHON"] = "/home/ubuntu/miniconda/envs/py37/bin/python"; using Pkg; Pkg.build("PyCall");'
    
-## add julia kernel
+## add julia kernel --------
+
 RUN julia -e 'using Pkg; Pkg.add("IJulia"); Pkg.precompile();' && \
-    # move kernelspec out of home \
+    ## move kernelspec out of home \
     mv "${HOME}/.local/share/jupyter/kernels/julia"* "${CONDA_DIR}/share/jupyter/kernels/" && \
     chmod -R go+rx "${CONDA_DIR}/share/jupyter" && \
     rm -rf "${HOME}/.local" && \
@@ -81,5 +88,5 @@ RUN julia -e 'using Pkg; Pkg.add("IJulia"); Pkg.precompile();' && \
 
 ## wrap up -------
 
-WORKDIR "${HOME}"
-# WORKDIR /notebooks
+# WORKDIR "${HOME}"
+WORKDIR /home/jovyan/notebooks
