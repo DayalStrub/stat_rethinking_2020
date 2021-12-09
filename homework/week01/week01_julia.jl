@@ -13,13 +13,18 @@
 # ---
 
 using Turing
-# using StatsPlots
+using StatsPlots
+
+using DataFrames # , IndexedTables
+
+
+# ## 1
 
 W = 4
 N = 15;
 
 # +
-delta = 100
+delta = 1_000
 
 p_grid = range(0.0, 1.0, length=delta)
 # ## prior
@@ -29,9 +34,15 @@ prob_data = pdf.(Binomial.(N, p_grid), W)
 # ## postrior
 posterior = prob_data .* prob_p
 posterior = posterior ./ sum(posterior);
-
-# +
-# plot(posterior)
 # -
+
+df = DataFrame(p = p_grid, posterior = posterior, prior=prob_p, likelihood=prob_data);
+
+
+@df df plot(cols(1), cols(2:4))
+
+# ## 2
+
+# ## 3
 
 
