@@ -75,9 +75,9 @@ RUN julia -e 'import Pkg; Pkg.activate()' && \
 
 # USER ${NB_UID}
 
-RUN julia -e 'using Pkg; Pkg.add("IJulia"); Pkg.precompile();' && \
+# RUN julia -e 'using Pkg; Pkg.add("IJulia"); Pkg.precompile();' && \
     ## move kernelspec out of home \
-    mv "${HOME}/.local/share/jupyter/kernels/julia"* "${CONDA_DIR}/share/jupyter/kernels/" && \
+RUN mv "${HOME}/.local/share/jupyter/kernels/julia"* "${CONDA_DIR}/share/jupyter/kernels/" && \
     chmod -R go+rx "${CONDA_DIR}/share/jupyter" && \
     rm -rf "${HOME}/.local" && \
     fix-permissions "${JULIA_PKGDIR}" "${CONDA_DIR}/share/jupyter"
