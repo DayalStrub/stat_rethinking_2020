@@ -61,23 +61,19 @@ RUN mkdir /etc/julia && \
     chown "${NB_USER}" "${JULIA_PKGDIR}" && \
     fix-permissions "${JULIA_PKGDIR}"
 
-USER ${NB_UID}
-
 ### Add Julia packages -------
 
-## TODO not working/actually adding project packages
-
-RUN mkdir -p ~/.julia/environments/${JULIA_VERSION} 
-# && \ cp Project.toml $_
-COPY Project.toml ~/.julia/environments/${JULIA_VERSION}
+COPY Project.toml "${JULIA_PKGDIR}/environments/v1.6/"
 
 RUN julia -e 'import Pkg; Pkg.activate()' && \
     julia -e 'import Pkg; Pkg.update()'
     # TODO check ENV persist
     # julia -e 'ENV["R_HOME"] = "/home/ubuntu/miniconda/envs/R/lib/R";' && \
     # julia -e 'ENV["PYTHON"] = "/home/ubuntu/miniconda/envs/py37/bin/python"; using Pkg; Pkg.build("PyCall");'
-   
+
 ## add julia kernel --------
+
+# USER ${NB_UID}
 
 RUN julia -e 'using Pkg; Pkg.add("IJulia"); Pkg.precompile();' && \
     ## move kernelspec out of home \
@@ -85,8 +81,10 @@ RUN julia -e 'using Pkg; Pkg.add("IJulia"); Pkg.precompile();' && \
     chmod -R go+rx "${CONDA_DIR}/share/jupyter" && \
     rm -rf "${HOME}/.local" && \
     fix-permissions "${JULIA_PKGDIR}" "${CONDA_DIR}/share/jupyter"
-
+ 
 ## wrap up -------
+
+USER ${NB_UID}
 
 # WORKDIR "${HOME}"
 WORKDIR /home/jovyan/notebooks
